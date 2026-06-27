@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City PREDICTION</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #070916;
+            --panel: rgba(18, 24, 48, 0.92);
+            --panel-soft: rgba(255, 255, 255, 0.08);
+            --accent: #7be4ff;
+            --accent-strong: #9c6dff;
+            --text: #eef6ff;
+            --muted: #9db5d3;
+            --shadow: 0 32px 90px rgba(0, 0, 0, 0.25);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top left, rgba(123, 228, 255, 0.16), transparent 18%),
+                        radial-gradient(circle at 80% 10%, rgba(156, 109, 255, 0.14), transparent 16%),
+                        linear-gradient(180deg, #090914 0%, #05070f 100%);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 18% 22%, rgba(123, 228, 255, 0.12), transparent 18%),
+                        radial-gradient(circle at 82% 30%, rgba(156, 109, 255, 0.1), transparent 14%);
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .background {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .background__glow {
+            position: absolute;
+            width: 24rem;
+            height: 24rem;
+            filter: blur(76px);
+            opacity: 0.8;
+        }
+
+        .background__glow--left {
+            top: 2rem;
+            left: -6rem;
+            background: radial-gradient(circle, rgba(123, 228, 255, 0.5), transparent 55%);
+        }
+
+        .background__glow--right {
+            bottom: 2rem;
+            right: -6rem;
+            background: radial-gradient(circle, rgba(156, 109, 255, 0.45), transparent 55%);
+        }
+
+        .container {
+            position: relative;
+            width: min(560px, calc(100% - 2rem));
+            margin: 4.5rem auto 4rem;
+            padding: 2.4rem 2.2rem;
+            border-radius: 34px;
+            background: linear-gradient(180deg, rgba(19, 27, 58, 0.96), rgba(8, 12, 24, 0.96));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(123, 228, 255, 0.08), transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 1.8rem;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: clamp(2.2rem, 4vw, 2.9rem);
+            letter-spacing: -0.04em;
+            line-height: 1.05;
+        }
+
+        p {
+            margin: 0.8rem 0 0;
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 42rem;
+        }
+
+        form {
+            display: grid;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            border: none;
+            border-radius: 18px;
+            padding: 1rem 1.15rem;
+            font-size: 1rem;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        input[type="number"]::placeholder {
+            color: rgba(238, 246, 255, 0.58);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(123, 228, 255, 0.5);
+            transform: translateY(-1px);
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            border-radius: 999px;
+            padding: 1rem 1.4rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #060d18;
+            background: linear-gradient(135deg, #7be4ff 0%, #9c6dff 100%);
+            cursor: pointer;
+            box-shadow: 0 18px 44px rgba(123, 228, 255, 0.22);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 26px 54px rgba(123, 228, 255, 0.28);
+        }
+
+        .result {
+            margin-top: 1.6rem;
+            min-height: 4.4rem;
+            padding: 1.2rem 1.3rem;
+            border-radius: 24px;
+            background: rgba(6, 10, 21, 0.85);
+            border: 1px solid rgba(123, 228, 255, 0.12);
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            text-align: center;
+            line-height: 1.5;
+            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .decor {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .decor__model {
+            position: absolute;
+            transform-style: preserve-3d;
+            animation: float 11s ease-in-out infinite alternate;
+        }
+
+        .decor__cube {
+            width: 94px;
+            height: 94px;
+            top: 12%;
+            right: 6%;
+            transform: rotateX(38deg) rotateY(20deg);
+        }
+
+        .decor__cube span {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(123, 228, 255, 0.16);
+            backdrop-filter: blur(8px);
+        }
+
+        .decor__cube span:nth-child(1) { transform: translateZ(47px); }
+        .decor__cube span:nth-child(2) { transform: rotateY(90deg) translateZ(47px); }
+        .decor__cube span:nth-child(3) { transform: rotateY(180deg) translateZ(47px); }
+        .decor__cube span:nth-child(4) { transform: rotateY(-90deg) translateZ(47px); }
+        .decor__cube span:nth-child(5) { transform: rotateX(90deg) translateZ(47px); }
+        .decor__cube span:nth-child(6) { transform: rotateX(-90deg) translateZ(47px); }
+
+        .decor__ring {
+            width: 180px;
+            height: 180px;
+            top: 18%;
+            left: -6%;
+            border-radius: 50%;
+            border: 2px dashed rgba(123, 228, 255, 0.24);
+            transform: rotateZ(-14deg);
+            animation-duration: 13s;
+        }
+
+        .decor__ring::before {
+            content: '';
+            position: absolute;
+            inset: 18px;
+            border-radius: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .decor__sphere {
+            width: 110px;
+            height: 110px;
+            bottom: 10%;
+            left: 10%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, rgba(156, 109, 255, 0.92), rgba(123, 228, 255, 0.18) 58%, transparent 76%);
+            box-shadow: 0 0 48px rgba(123, 228, 255, 0.22);
+            animation-duration: 15s;
+        }
+
+        .decor__sphere::before {
+            content: '';
+            position: absolute;
+            inset: 18px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .decor__panel {
+            width: 172px;
+            height: 108px;
+            right: 8%;
+            bottom: 12%;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: perspective(900px) rotateX(16deg) rotateY(-16deg);
+            box-shadow: 0 28px 72px rgba(0, 0, 0, 0.18);
+        }
+
+        .decor__panel::after {
+            content: '';
+            position: absolute;
+            inset: 16px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(123, 228, 255, 0.16), transparent 80%);
+        }
+
+        @keyframes float {
+            from { transform: translate3d(0, 0, 0) rotateZ(0deg); }
+            to { transform: translate3d(0, 18px, 0) rotateZ(18deg); }
+        }
+
+        @media (max-width: 580px) {
+            .container {
+                margin: 2.5rem auto 3rem;
+                padding: 2rem 1.3rem;
+                border-radius: 28px;
+            }
+
+            .decor__cube,
+            .decor__ring {
+                display: none;
+            }
+
+            .decor__sphere {
+                left: 57%;
+                bottom: 6%;
+            }
+
+            .decor__panel {
+                right: 4%;
+                bottom: 4%;
+                width: 150px;
+                height: 92px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background" aria-hidden="true">
+        <div class="background__glow background__glow--left"></div>
+        <div class="background__glow background__glow--right"></div>
+    </div>
+
+    <div class="decor" aria-hidden="true">
+        <div class="decor__model decor__cube">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="decor__model decor__ring"></div>
+        <div class="decor__model decor__sphere"></div>
+        <div class="decor__model decor__panel"></div>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h2>Location Prediction</h2>
+            <p>Fill in the area and price details to discover your location prediction in a vivid, futuristic interface.</p>
+        </div>
+
+        <form id="predictForm">
+            <input type="number" step="any" id="f1" placeholder="Area" required>
+            <input type="number" step="any" id="f2" placeholder="Price" required>
+            <button type="submit">Predict &#128269;</button>
+        </form>
+
+        <div class="result" id="result">Enter the values and tap Predict to reveal the location prediction.</div>
+    </div>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit',async function(e){
+            e.preventDefault();
+            let features=[
+            parseFloat(document.getElementById('f1').value),
+            parseFloat(document.getElementById('f2').value)
+            ];
+
+        let response=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({features:features})
+        });
+        
+        let result= await response.json();
+        console.log(result); //debug
+        if (result.city){
+            document.getElementById('result').innerText='Prediction:' + result.city + '(Class ' +result.prediction +')';
+            }
+            else{
+                document.getElementById('result').innerText='Error:' + (result.error || 'Unknown error');
+            }
+        })
+    </script>
+</body>
+</html>
